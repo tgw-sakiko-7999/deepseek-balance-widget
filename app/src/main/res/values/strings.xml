@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DS余额</string>
+    <string name="widget_label">DeepSeek 余额</string>
+    <string name="widget_desc">实时查看 DeepSeek API 账户余额</string>
+</resources>

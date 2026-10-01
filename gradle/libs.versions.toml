@@ -1,0 +1,17 @@
+[versions]
+agp = "8.7.3"
+kotlin = "2.2.20"
+glance = "1.2.0"
+activityCompose = "1.9.3"
+composeBom = "2024.12.01"
+
+[libraries]
+glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
