@@ -32,10 +32,11 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
+import androidx.glance.layout.width
 import java.io.File
 import kotlin.math.ceil
 import androidx.glance.text.FontWeight
@@ -260,7 +261,8 @@ private fun WidgetContent(
         Image(
             provider = mascot,
             contentDescription = null,
-            modifier = GlanceModifier.size(side, size.height),
+            // 高度直接撑满行高，避免 LocalSize 与桌面实际尺寸的误差造成上下留白喵
+            modifier = GlanceModifier.fillMaxHeight().width(side),
             contentScale = ContentScale.Crop,
         )
     }
