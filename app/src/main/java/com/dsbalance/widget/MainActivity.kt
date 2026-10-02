@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val store = BalanceStore(this)
+        RefreshScheduler.schedule(this)
         // 从组件长按菜单（重新配置）或初次添加进来时带 widget id，保存后要回传结果喵
         val appWidgetId = intent?.getIntExtra(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -65,7 +66,7 @@ class MainActivity : ComponentActivity() {
                             ).show()
                             if (ok) {
                                 hasCustomMascot = true
-                                updateAllBalanceWidgets(this@MainActivity)
+                                BalanceWidget.updateAll(this@MainActivity)
                             }
                         }
                     }
@@ -95,7 +96,7 @@ class MainActivity : ComponentActivity() {
                             store.threshold = threshold.toBigDecimalOrNull() ?: BigDecimal.ZERO
                             scope.launch {
                                 fetchAndStore(this@MainActivity)
-                                updateAllBalanceWidgets(this@MainActivity)
+                                BalanceWidget.updateAll(this@MainActivity)
                                 Toast.makeText(this@MainActivity, "已保存并刷新", Toast.LENGTH_SHORT).show()
                             }
                             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -120,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                     val ok = withContext(Dispatchers.IO) { resetMascot(this@MainActivity) }
                                     if (ok) {
                                         hasCustomMascot = false
-                                        updateAllBalanceWidgets(this@MainActivity)
+                                        BalanceWidget.updateAll(this@MainActivity)
                                         Toast.makeText(this@MainActivity, "已恢复默认", Toast.LENGTH_SHORT).show()
                                     }
                                 }
@@ -134,10 +135,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun updateAllBalanceWidgets(context: Context) {
-        val manager = GlanceAppWidgetManager(context)
-        manager.getGlanceIds(BalanceWidget::class.java).forEach {
-            BalanceWidget.update(context, it)
-        }
-    }
 }

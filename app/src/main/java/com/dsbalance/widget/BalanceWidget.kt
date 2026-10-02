@@ -1,5 +1,6 @@
 package com.dsbalance.widget
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -21,6 +22,7 @@ import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
@@ -53,6 +55,11 @@ import kotlinx.coroutines.withContext
 
 class BalanceWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = BalanceWidget
+
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        RefreshScheduler.schedule(context)
+    }
 }
 
 object BalanceWidget : GlanceAppWidget() {
@@ -76,6 +83,12 @@ object BalanceWidget : GlanceAppWidget() {
         }
         val mascot = loadMascot(context)
         provideContent { WidgetContent(snapshot, balanceImage, updatedImage, palette, mascot) }
+    }
+
+    /** 通知桌面所有实例重渲染喵 */
+    suspend fun updateAll(context: Context) {
+        val manager = GlanceAppWidgetManager(context)
+        manager.getGlanceIds(this@BalanceWidget::class.java).forEach { update(context, it) }
     }
 
     private fun loadMascot(context: Context): ImageProvider =
@@ -268,7 +281,7 @@ private fun WidgetContent(
     }
 }
 
-private fun currencySymbol(code: String?): String = when (code) {
+internal fun currencySymbol(code: String?): String = when (code) {
     "CNY" -> "¥"
     "USD" -> "$"
     "EUR" -> "€"
