@@ -21,8 +21,8 @@ android {
         applicationId = "com.dsbalance.widget"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.0.3"
+        versionCode = 6
+        versionName = "1.0.4"
         // 应用文案只有中英两套，把 androidx 库带进来的其余几十种语言资源全裁掉，resources.arsc 能小一大截喵
         resourceConfigurations += listOf("zh", "en")
     }
