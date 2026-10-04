@@ -23,6 +23,21 @@ android {
         targetSdk = 35
         versionCode = 5
         versionName = "1.0.3"
+        // 应用文案只有中英两套，把 androidx 库带进来的其余几十种语言资源全裁掉，resources.arsc 能小一大截喵
+        resourceConfigurations += listOf("zh", "en")
+    }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                // 协程调试探针和构建期元数据，运行时都用不到喵
+                "DebugProbesKt.bin",
+                "kotlin-tooling-metadata.json",
+                "META-INF/version-control-info.textproto",
+                "META-INF/com/android/build/gradle/app-metadata.properties",
+                "META-INF/*.version",
+            )
+        }
     }
 
     signingConfigs {
@@ -59,8 +74,7 @@ android {
 }
 
 dependencies {
-    implementation(platform(libs.compose.bom))
     implementation(libs.glance.appwidget)
-    implementation(libs.activity.compose)
-    implementation(libs.compose.material3)
+    implementation(libs.androidx.activity)
+    implementation(libs.kotlinx.coroutines.android)
 }

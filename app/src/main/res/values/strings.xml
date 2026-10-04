@@ -3,4 +3,12 @@
     <string name="app_name">DS余额</string>
     <string name="widget_label">DeepSeek 余额</string>
     <string name="widget_desc">实时查看 DeepSeek API 账户余额</string>
+    <string name="settings_title">DeepSeek 余额小组件</string>
+    <string name="hint_api_key">API Key</string>
+    <string name="hint_threshold">低额提醒阈值（0 为关闭）</string>
+    <string name="save_and_refresh">保存并刷新</string>
+    <string name="change_mascot">更换表情包</string>
+    <string name="reset_mascot">恢复默认</string>
+    <string name="privacy_note">API Key 只保存在本应用私有存储中，不会外传。</string>
+    <string name="usage_note">保存后回到桌面：长按空白处 → 小组件 → DeepSeek 余额。</string>
 </resources>

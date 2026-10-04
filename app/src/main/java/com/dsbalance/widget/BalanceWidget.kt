@@ -85,17 +85,33 @@ object BalanceWidget : GlanceAppWidget() {
         provideContent { WidgetContent(snapshot, balanceImage, updatedImage, palette, mascot) }
     }
 
-    /** 通知桌面所有实例重渲染喵 */
-    suspend fun updateAll(context: Context) {
+    /** 通知桌面所有实例重渲染；返回桌面是否还有实例，供调度判断要不要继续跑闹钟链喵 */
+    suspend fun updateAll(context: Context): Boolean {
         val manager = GlanceAppWidgetManager(context)
-        manager.getGlanceIds(this@BalanceWidget::class.java).forEach { update(context, it) }
+        val ids = manager.getGlanceIds(this@BalanceWidget::class.java)
+        ids.forEach { update(context, it) }
+        return ids.isNotEmpty()
     }
 
-    private fun loadMascot(context: Context): ImageProvider =
-        mascotFile(context).takeIf { it.exists() }
-            ?.let { BitmapFactory.decodeFile(it.absolutePath) }
-            ?.let { ImageProvider(it) }
-            ?: ImageProvider(R.drawable.widget_mascot)
+    /** 只查桌面还有没有本组件实例，不触发渲染喵 */
+    suspend fun hasWidgets(context: Context): Boolean =
+        GlanceAppWidgetManager(context).getGlanceIds(this@BalanceWidget::class.java).isNotEmpty()
+
+    // 自定义表情包的解码结果按文件时间戳缓存，免得每分钟重渲染都重新解码一次喵
+    private var mascotBitmap: Bitmap? = null
+    private var mascotStamp: Long = 0
+
+    private fun loadMascot(context: Context): ImageProvider {
+        val file = mascotFile(context)
+        if (!file.exists()) return ImageProvider(R.drawable.widget_mascot)
+        val stamp = file.lastModified()
+        val cached = mascotBitmap
+        if (cached == null || stamp != mascotStamp) {
+            mascotBitmap = BitmapFactory.decodeFile(file.absolutePath)
+            mascotStamp = stamp
+        }
+        return mascotBitmap?.let { ImageProvider(it) } ?: ImageProvider(R.drawable.widget_mascot)
+    }
 
     private fun isNight(context: Context): Boolean =
         (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
@@ -192,11 +208,18 @@ class RefreshAction : ActionCallback {
     ) {
         fetchAndStore(context)
         BalanceWidget.update(context, glanceId)
+        // 手点刷新顺带把可能断掉的闹钟链接回来喵
+        RefreshScheduler.schedule(context)
     }
 }
 
 // 自定义表情包存在应用私有目录，缺省用打包资源；贴图规则：高=组件高、贴右、CENTER_CROP 喵
 internal fun mascotFile(context: Context): File = File(context.filesDir, "mascot.png")
+
+// 自定义表情包统一存 WebP：同画质下比 PNG 小一个数量级，省用户存储；
+// API 30 起 WEBP 被拆成 LOSSY/LOSSLESS，但老枚举在所有版本都还能用喵
+@Suppress("DEPRECATION")
+private val MASCOT_FORMAT = Bitmap.CompressFormat.WEBP
 
 fun saveMascotFromUri(context: Context, uri: Uri): Boolean = try {
     val resolver = context.contentResolver
@@ -214,7 +237,7 @@ fun saveMascotFromUri(context: Context, uri: Uri): Boolean = try {
             false
         } else {
             mascotFile(context).outputStream().use { out ->
-                src.compress(Bitmap.CompressFormat.PNG, 100, out)
+                src.compress(MASCOT_FORMAT, 90, out)
             }
             true
         }
